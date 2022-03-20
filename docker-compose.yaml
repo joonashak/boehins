@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: mongo:4.4-bionic
+    restart: unless-stopped
+    container_name: reclab2-db
+    volumes:
+      - type: volume
+        source: mongo-data
+        target: /data/db
+        volume:
+          nocopy: true
+    ports:
+      - 27017:27017
+
+  server:
+    build: ./cms
+    ports:
+      - 3001:3001
+    container_name: reclab2-cms
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=mongodb://db/reclab2
+    volumes:
+      - ./cms/src:/usr/src/app/src
+    depends_on:
+      - db
+
+volumes:
+  mongo-data:
