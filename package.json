@@ -1,0 +1,19 @@
+{
+  "name": "reclab2",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "docker compose up -d --build && docker compose logs -f cms",
+    "stop": "docker compose down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joonashak/reclab2.git"
+  },
+  "author": "Joonas Häkkinen <hakkijoo@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joonashak/reclab2/issues"
+  },
+  "homepage": "https://github.com/joonashak/reclab2#readme"
+}
