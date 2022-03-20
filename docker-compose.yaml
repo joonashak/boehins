@@ -28,5 +28,17 @@ services:
     depends_on:
       - db
 
+  web:
+    build: ./web
+    ports:
+      - 3000:3000
+    container_name: reclab2-web
+    environment:
+      - PORT=3000
+    volumes:
+      - ./web/pages:/usr/src/app/pages
+    depends_on:
+      - cms
+
 volumes:
   mongo-data:
