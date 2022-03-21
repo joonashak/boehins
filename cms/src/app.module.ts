@@ -6,6 +6,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DATABASE_URL } from "./config";
 import { UserModule } from "./user/user.module";
+import { UserService } from "./user/user.service";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserModule } from "./user/user.module";
     }),
     UserModule,
   ],
-  providers: [AppService, AppController],
+  // FIXME: Remove these and app.controller.ts (here only to have a temporary resolver for graphql to work.)
+  providers: [AppService, AppController, UserService],
 })
 export class AppModule {}
