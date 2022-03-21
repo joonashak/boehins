@@ -11,6 +11,7 @@ export class DevToolsService implements OnApplicationBootstrap {
   async onApplicationBootstrap(): Promise<void> {
     this.logger.warn("DEVTOOLS ARE ACTIVE");
     await this.upsertMockUsers();
+    console.log(await this.userService.findOne("admin"));
   }
 
   async upsertMockUsers(): Promise<void> {
