@@ -4,8 +4,8 @@ import { PassportModule } from "@nestjs/passport";
 import { JWT_LIFETIME, JWT_SECRET } from "../config";
 import { UserModule } from "../user/user.module";
 import { UserService } from "../user/user.service";
+import { AuthResolver } from "./auth.resolver";
 import { AuthService } from "./auth.service";
-import { LocalStrategy } from "./strategies/local.strategy";
 
 @Module({
   imports: [
@@ -16,6 +16,6 @@ import { LocalStrategy } from "./strategies/local.strategy";
       signOptions: { expiresIn: JWT_LIFETIME },
     }),
   ],
-  providers: [UserService, LocalStrategy, AuthService],
+  providers: [UserService, AuthService, AuthResolver],
 })
 export class AuthModule {}
