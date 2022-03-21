@@ -20,4 +20,22 @@ export class UserService {
     const newUser = await this.userModel.create({ ...rest, passwordHash });
     return newUser;
   }
+
+  async findOne(
+    username: string,
+    options?: { withPasswordHash: boolean },
+  ): Promise<User> {
+    if (options?.withPasswordHash) {
+      return this.getUserWithPasswordHash(username);
+    }
+    return this.getUser(username);
+  }
+
+  private async getUser(username: string): Promise<User> {
+    return this.userModel.findOne({ username });
+  }
+
+  private async getUserWithPasswordHash(username: string): Promise<User> {
+    return this.userModel.findOne({ username }).select("+passwordHash");
+  }
 }
