@@ -16,7 +16,7 @@ export class User {
 
   @Field()
   @Prop({ select: false })
-  passwordHash: string;
+  passwordHash?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
