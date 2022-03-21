@@ -4,4 +4,4 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
 
-CMD npm start
+CMD npm run start:dev -- --preserveWatchOutput
