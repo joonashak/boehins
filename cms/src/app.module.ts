@@ -5,6 +5,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DATABASE_URL } from "./config";
+import { UserModule } from "./user/user.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DATABASE_URL } from "./config";
       playground: true,
       debug: false,
     }),
+    UserModule,
   ],
   providers: [AppService, AppController],
 })
