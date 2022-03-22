@@ -1,6 +1,8 @@
 import { UseGuards } from "@nestjs/common";
 import { Args, Mutation, Resolver } from "@nestjs/graphql";
+import { User } from "../user/user.model";
 import { AuthService } from "./auth.service";
+import { CurrentUser } from "./decorators/user.decorator";
 import { LoginResponse } from "./dto/loginResponse.dto";
 import { LoginGuard } from "./guards/login.guard";
 
@@ -13,7 +15,8 @@ export class AuthResolver {
   async login(
     @Args("username") username: string,
     @Args("password") password: string,
+    @CurrentUser() user: User,
   ): Promise<LoginResponse> {
-    return { accessToken: "asdasd" };
+    return this.authService.getToken(user);
   }
 }
