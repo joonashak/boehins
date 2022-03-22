@@ -4,12 +4,14 @@ import { compare } from "bcrypt";
 import { User } from "../user/user.model";
 import { UserService } from "../user/user.service";
 import { LoginResponse } from "./dto/loginResponse.dto";
+import { SessionService } from "./session/session.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async validateUser(username: string, password: string): Promise<User | null> {
@@ -28,9 +30,8 @@ export class AuthService {
   async getToken(user: User): Promise<LoginResponse> {
     const payload = { username: user.username };
     const accessToken = this.jwtService.sign(payload);
-    const { iat, exp }: any = this.jwtService.decode(accessToken);
-    console.log(new Date(iat * 1000));
-    console.log(new Date(exp * 1000));
+    await this.sessionService.create(accessToken);
+
     return {
       accessToken,
     };
