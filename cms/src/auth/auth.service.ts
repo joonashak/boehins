@@ -30,7 +30,7 @@ export class AuthService {
   async getToken(user: User): Promise<LoginResponse> {
     const payload = { username: user.username };
     const accessToken = this.jwtService.sign(payload);
-    await this.sessionService.create(accessToken);
+    await this.sessionService.create(accessToken, user);
 
     return {
       accessToken,
