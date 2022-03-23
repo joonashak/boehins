@@ -23,6 +23,11 @@ export class SessionService {
     return this.sessionModel.create({ tokenHash, expiresAt, user });
   }
 
+  async findOne(token: string): Promise<Session> {
+    const tokenHash = await hash(token, 12);
+    return this.sessionModel.findOne({ tokenHash });
+  }
+
   @Cron("0 3 * * * *")
   async removeExpiredSessions(): Promise<void> {
     const { deletedCount } = await this.sessionModel.remove({
