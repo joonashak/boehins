@@ -6,6 +6,8 @@ import { UserService } from "../user/user.service";
 import { LoginResponse } from "./dto/loginResponse.dto";
 import { SessionService } from "./session/session.service";
 
+export type JwtPayload = { sessionId: string };
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -34,7 +36,7 @@ export class AuthService {
    */
   async getToken(user: User): Promise<LoginResponse> {
     const session = await this.sessionService.create(user);
-    const payload = { sessionId: session.id };
+    const payload: JwtPayload = { sessionId: session.id };
     const accessToken = this.jwtService.sign(payload);
 
     return {

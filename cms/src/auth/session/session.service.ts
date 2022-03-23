@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Cron } from "@nestjs/schedule";
 import { Model } from "mongoose";
@@ -22,7 +21,7 @@ export class SessionService {
   }
 
   async findOneById(id: string): Promise<Session> {
-    return this.sessionModel.findOne({ id });
+    return this.sessionModel.findOne({ id }).populate("user");
   }
 
   @Cron("0 3 * * * *")
