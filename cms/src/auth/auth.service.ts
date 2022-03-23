@@ -27,10 +27,15 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Create new session and get a corresponding JWT token.
+   * @param user User to link to session.
+   * @returns Object with JWT token to be saved client-side.
+   */
   async getToken(user: User): Promise<LoginResponse> {
-    const payload = { username: user.username };
+    const session = await this.sessionService.create(user);
+    const payload = { sessionId: session.id };
     const accessToken = this.jwtService.sign(payload);
-    await this.sessionService.create(accessToken, user);
 
     return {
       accessToken,

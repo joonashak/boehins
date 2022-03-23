@@ -2,8 +2,9 @@ import { Injectable, Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Cron } from "@nestjs/schedule";
-import { hash } from "bcrypt";
 import { Model } from "mongoose";
+import ms from "ms";
+import { JWT_LIFETIME } from "../../config";
 import { User } from "../../user/user.model";
 import { Session, SessionDocument } from "./session.model";
 
@@ -13,19 +14,15 @@ export class SessionService {
 
   constructor(
     @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
-    private readonly jwtService: JwtService,
   ) {}
 
-  async create(token: string, user: User): Promise<Session> {
-    const { exp }: any = this.jwtService.decode(token);
-    const expiresAt = new Date(exp * 1000);
-    const tokenHash = await hash(token, 12);
-    return this.sessionModel.create({ tokenHash, expiresAt, user });
+  async create(user: User): Promise<Session> {
+    const expiresAt = new Date(Date.now() + ms(JWT_LIFETIME));
+    return this.sessionModel.create({ expiresAt, user });
   }
 
-  async findOne(token: string): Promise<Session> {
-    const tokenHash = await hash(token, 12);
-    return this.sessionModel.findOne({ tokenHash });
+  async findOneById(id: string): Promise<Session> {
+    return this.sessionModel.findOne({ id });
   }
 
   @Cron("0 3 * * * *")
