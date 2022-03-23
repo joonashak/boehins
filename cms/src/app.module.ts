@@ -2,6 +2,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
@@ -19,6 +20,7 @@ import { UserService } from "./user/user.service";
       playground: true,
       debug: false,
     }),
+    ScheduleModule.forRoot(),
     UserModule,
     DevToolsModule,
     AuthModule,
