@@ -4,7 +4,7 @@ services:
   db:
     image: mongo:4.4-bionic
     restart: unless-stopped
-    container_name: reclab2-db
+    container_name: boehins-db
     volumes:
       - type: volume
         source: mongo-data
@@ -18,11 +18,11 @@ services:
     build: ./cms
     ports:
       - 3001:3001
-    container_name: reclab2-cms
+    container_name: boehins-cms
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=mongodb://db/reclab2
+      - DATABASE_URL=mongodb://db/boehins
       - JWT_SECRET=asd
     volumes:
       - ./cms/src:/usr/src/app/src
@@ -33,7 +33,7 @@ services:
     build: ./web
     ports:
       - 3000:3000
-    container_name: reclab2-web
+    container_name: boehins-web
     environment:
       - PORT=3000
     volumes:

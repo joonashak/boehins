@@ -1,5 +1,5 @@
 {
-  "name": "reclab2",
+  "name": "boehins",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joonashak/reclab2.git"
+    "url": "git+https://github.com/joonashak/boehins.git"
   },
   "author": "Joonas Häkkinen <hakkijoo@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/joonashak/reclab2/issues"
+    "url": "https://github.com/joonashak/boehins/issues"
   },
-  "homepage": "https://github.com/joonashak/reclab2#readme"
+  "homepage": "https://github.com/joonashak/boehins#readme"
 }
