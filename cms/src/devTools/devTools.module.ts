@@ -1,7 +1,7 @@
 import { Module, ModuleMetadata } from "@nestjs/common";
-import { DEV_TOOLS_ENABLED } from "src/config";
-import { UserModule } from "src/user/user.module";
-import { UserService } from "src/user/user.service";
+import { DEV_TOOLS_ENABLED } from "../config";
+import { UserModule } from "../user/user.module";
+import { UserService } from "../user/user.service";
 import { DevToolsService } from "./devTools.service";
 
 const options: ModuleMetadata = {
