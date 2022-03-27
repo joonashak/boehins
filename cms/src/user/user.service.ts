@@ -56,7 +56,7 @@ export class UserService {
     }
 
     if (!password) {
-      throw new ValidationError("Password cannot be empty");
+      throw new ValidationError("Password cannot be empty.");
     }
 
     const qualityChecks = [

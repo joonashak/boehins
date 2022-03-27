@@ -5,16 +5,17 @@ import { compare } from "bcrypt";
 import { UserService } from "./user.service";
 import { User, UserDocument } from "./user.model";
 
-const testUser = { username: "test-user", password: "Abcde123" };
+const testUserInput = { username: "test-user", password: "Abcde123" };
+const { password: _, ...testUser } = testUserInput;
+
+const testUsers = [testUser, { username: "test-user-2" }];
 
 describe("UserService", () => {
   let service: UserService;
   let model: Model<UserDocument>;
 
-  const createTestUserWithPassword = async (
-    password: string,
-  ): Promise<User> => {
-    return service.create({ username: testUser.username, password });
+  const createTestUserWithPassword = async (password: string): Promise<User> => {
+    return service.create({ username: testUserInput.username, password });
   };
 
   beforeEach(async () => {
@@ -24,19 +25,12 @@ describe("UserService", () => {
         {
           provide: getModelToken("User"),
           useValue: {
-            create: jest
-              .fn()
-              .mockImplementation(({ username }) => ({ username })),
+            create: jest.fn().mockImplementation(({ username }) => ({ username })),
             findOne: jest.fn().mockImplementation(({ username }) => ({
               then: (resolve) => resolve({ username }),
               select: () => ({ username, passwordHash: "zxcv" }),
             })),
-            find: jest
-              .fn()
-              .mockImplementation(() => [
-                { username: "test1" },
-                { username: "test2" },
-              ]),
+            find: jest.fn().mockImplementation(() => testUsers),
           },
         },
       ],
@@ -47,9 +41,7 @@ describe("UserService", () => {
   });
 
   it("Create user", async () => {
-    expect(await service.create(testUser)).toStrictEqual({
-      username: testUser.username,
-    });
+    await expect(service.create(testUserInput)).resolves.toStrictEqual(testUser);
 
     expect(jest.spyOn(model, "create")).toBeCalledTimes(1);
 
@@ -57,43 +49,45 @@ describe("UserService", () => {
     const { calls }: any = jest.spyOn(model, "create").mock;
     const call = calls[0][0];
     const { username, passwordHash } = call;
-    expect(await compare(testUser.password, passwordHash)).toBe(true);
-    expect(username).toBe(testUser.username);
+    await expect(compare(testUserInput.password, passwordHash)).resolves.toBe(true);
+    expect(username).toBe(testUserInput.username);
   });
 
   it("Find one user", async () => {
-    expect(await service.findOne("asd")).toStrictEqual({ username: "asd" });
-    expect(jest.spyOn(model, "findOne")).toBeCalledWith({ username: "asd" });
+    const { username } = testUser;
+    await expect(service.findOne(username)).resolves.toStrictEqual(testUser);
+    expect(jest.spyOn(model, "findOne")).toBeCalledWith({ username });
   });
 
   it("Find one user with password hash", async () => {
-    expect(
-      await service.findOne("asd", { withPasswordHash: true }),
-    ).toStrictEqual({ username: "asd", passwordHash: "zxcv" });
+    const { username } = testUser;
 
-    expect(jest.spyOn(model, "findOne")).toBeCalledWith({ username: "asd" });
+    await expect(
+      service.findOne(username, { withPasswordHash: true }),
+    ).resolves.toStrictEqual({
+      username,
+      passwordHash: "zxcv",
+    });
+
+    expect(jest.spyOn(model, "findOne")).toBeCalledWith({ username });
   });
 
   it("Find all users", async () => {
-    expect(await service.findAll()).toStrictEqual([
-      { username: "test1" },
-      { username: "test2" },
-    ]);
-
+    await expect(service.findAll()).resolves.toStrictEqual(testUsers);
     expect(jest.spyOn(model, "find")).toBeCalled();
   });
 
   it("Cannot create user with empty username", async () => {
-    await expect(
-      service.create({ username: "", password: "123" }),
-    ).rejects.toThrow();
+    await expect(service.create({ ...testUserInput, username: "" })).rejects.toThrow(
+      "Username cannot be empty.",
+    );
     expect(jest.spyOn(model, "create")).not.toBeCalled();
   });
 
   it("Cannot create user with empty password", async () => {
-    await expect(
-      service.create({ username: "asd", password: "" }),
-    ).rejects.toThrow();
+    await expect(service.create({ ...testUserInput, password: "" })).rejects.toThrow(
+      "Password cannot be empty.",
+    );
     expect(jest.spyOn(model, "create")).not.toBeCalled();
   });
 
