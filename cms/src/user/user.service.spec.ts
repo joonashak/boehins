@@ -3,11 +3,19 @@ import { Test } from "@nestjs/testing";
 import { Model } from "mongoose";
 import { compare } from "bcrypt";
 import { UserService } from "./user.service";
-import { UserDocument } from "./user.model";
+import { User, UserDocument } from "./user.model";
+
+const testUser = { username: "test-user", password: "Abcde123" };
 
 describe("UserService", () => {
   let service: UserService;
   let model: Model<UserDocument>;
+
+  const createTestUserWithPassword = async (
+    password: string,
+  ): Promise<User> => {
+    return service.create({ username: testUser.username, password });
+  };
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -39,10 +47,8 @@ describe("UserService", () => {
   });
 
   it("Create user", async () => {
-    expect(
-      await service.create({ username: "asd", password: "123" }),
-    ).toStrictEqual({
-      username: "asd",
+    expect(await service.create(testUser)).toStrictEqual({
+      username: testUser.username,
     });
 
     expect(jest.spyOn(model, "create")).toBeCalledTimes(1);
@@ -51,8 +57,8 @@ describe("UserService", () => {
     const { calls }: any = jest.spyOn(model, "create").mock;
     const call = calls[0][0];
     const { username, passwordHash } = call;
-    expect(await compare("123", passwordHash)).toBe(true);
-    expect(username).toBe("asd");
+    expect(await compare(testUser.password, passwordHash)).toBe(true);
+    expect(username).toBe(testUser.username);
   });
 
   it("Find one user", async () => {
@@ -81,13 +87,22 @@ describe("UserService", () => {
     await expect(
       service.create({ username: "", password: "123" }),
     ).rejects.toThrow();
-    expect(jest.spyOn(model, "create")).not.toBeCalled;
+    expect(jest.spyOn(model, "create")).not.toBeCalled();
   });
 
   it("Cannot create user with empty password", async () => {
     await expect(
       service.create({ username: "asd", password: "" }),
     ).rejects.toThrow();
-    expect(jest.spyOn(model, "create")).not.toBeCalled;
+    expect(jest.spyOn(model, "create")).not.toBeCalled();
+  });
+
+  it("Enforce basic password strength", async () => {
+    const msg = "The password is not strong enough.";
+    await expect(createTestUserWithPassword("Abc1234")).rejects.toThrow(msg);
+    await expect(createTestUserWithPassword("Abcedfgh")).rejects.toThrow(msg);
+    await expect(createTestUserWithPassword("abcd1234")).rejects.toThrow(msg);
+    await expect(createTestUserWithPassword("ABCD1234")).rejects.toThrow(msg);
+    expect(jest.spyOn(model, "create")).not.toBeCalled();
   });
 });

@@ -47,6 +47,9 @@ export class UserService {
     return this.userModel.findOne({ username }).select("+passwordHash");
   }
 
+  /**
+   * Enforce some level of credential quality even at service-level.
+   */
   private validateNewUserCredentials(username: string, password: string): void {
     if (!username) {
       throw new ValidationError("Username cannot be empty.");
@@ -54,6 +57,17 @@ export class UserService {
 
     if (!password) {
       throw new ValidationError("Password cannot be empty");
+    }
+
+    const qualityChecks = [
+      password.length > 7,
+      password.match(/[a-z]/),
+      password.match(/[A-Z]/),
+      password.match(/\d/),
+    ];
+
+    if (!qualityChecks.every((c) => c)) {
+      throw new ValidationError("The password is not strong enough.");
     }
   }
 }
