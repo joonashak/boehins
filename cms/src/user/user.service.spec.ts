@@ -76,4 +76,15 @@ describe("UserService", () => {
 
     expect(jest.spyOn(model, "find")).toBeCalled();
   });
+
+  // FIXME: These tests won't pass -> fix UserService!
+  it("Cannot create user with empty username", async () => {
+    expect(await service.create({ username: "", password: "123" })).toThrow();
+    expect(jest.spyOn(model, "create")).not.toBeCalled;
+  });
+
+  it("Cannot create user with empty password", async () => {
+    expect(await service.create({ username: "asd", password: "" })).toThrow();
+    expect(jest.spyOn(model, "create")).not.toBeCalled;
+  });
 });
