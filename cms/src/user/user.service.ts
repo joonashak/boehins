@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { ValidationError } from "apollo-server-express";
 import { hash } from "bcrypt";
 import { Model } from "mongoose";
 import { CreateUserDto } from "./dto/createUser.dto";
@@ -15,9 +16,16 @@ export class UserService {
   }
 
   async create(input: CreateUserDto): Promise<User> {
-    const { password, ...rest } = input;
+    const { username, password, ...rest } = input;
+    this.validateNewUserCredentials(username, password);
+
     const passwordHash = await hash(password, 12);
-    const newUser = await this.userModel.create({ ...rest, passwordHash });
+    const newUser = await this.userModel.create({
+      ...rest,
+      username,
+      passwordHash,
+    });
+
     return newUser;
   }
 
@@ -37,5 +45,15 @@ export class UserService {
 
   private async getUserWithPasswordHash(username: string): Promise<User> {
     return this.userModel.findOne({ username }).select("+passwordHash");
+  }
+
+  private validateNewUserCredentials(username: string, password: string): void {
+    if (!username) {
+      throw new ValidationError("Username cannot be empty.");
+    }
+
+    if (!password) {
+      throw new ValidationError("Password cannot be empty");
+    }
   }
 }
