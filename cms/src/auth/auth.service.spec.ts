@@ -24,7 +24,6 @@ describe("AuthService", () => {
       ],
       providers: [
         AuthService,
-        UserService,
         SessionService,
         {
           provide: UserService,
