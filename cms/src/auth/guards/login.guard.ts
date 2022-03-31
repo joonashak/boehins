@@ -1,15 +1,11 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
 import { AuthenticationError } from "apollo-server-express";
 import { AuthService } from "../auth.service";
 
 /**
  * Require valid credentials to allow activation.
- * 
+ *
  * GraphQL args must include strings `username` and `password`.
  */
 @Injectable()
