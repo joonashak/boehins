@@ -12,7 +12,18 @@ import { GraphQLExecutionContext } from "@nestjs/graphql";
 import { hash } from "bcrypt";
 import { AuthenticationError } from "apollo-server-express";
 
+const createContextWithGqlArgs = (gqlArgs: any): ExecutionContext => {
+  const gqlContext = createMock<GraphQLExecutionContext>();
+  const args: any = [{}, gqlArgs, gqlContext, {}];
+  const context = createMock<ExecutionContext>({
+    getArgs: () => args,
+    getType: () => "graphql",
+  });
+  return context;
+};
+
 describe("LoginGuard", () => {
+  let authService: AuthService;
   let guard: LoginGuard;
 
   beforeEach(async () => {
@@ -24,28 +35,24 @@ describe("LoginGuard", () => {
         }),
       ],
       providers: [
-        AuthService,
         SessionService,
         {
-          provide: UserService,
+          provide: AuthService,
           useFactory: () => ({
-            findOne: jest.fn(async () => ({
-              username: "admin",
-              passwordHash: await hash("Abcd1234", 12),
-            })),
+            validateUser: jest.fn(),
           }),
         },
         {
           provide: getModelToken("Session"),
           useValue: {
-            create: jest.fn().mockImplementation(() => {}),
+            create: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    const service = module.get<AuthService>(AuthService);
-    guard = new LoginGuard(service);
+    authService = module.get<AuthService>(AuthService);
+    guard = new LoginGuard(authService);
   });
 
   it("Is defined", () => {
@@ -53,24 +60,20 @@ describe("LoginGuard", () => {
   });
 
   it("Can login with valid credentials", async () => {
-    const ggg = createMock<GraphQLExecutionContext>();
-    const args: any = [{}, { username: "admin", password: "Abcd1234" }, ggg, {}];
-    const context = createMock<ExecutionContext>({
-      getArgs: () => args,
-      getType: () => "graphql",
-    });
+    const input = { username: "admin", password: "Abcd1234" };
+    const context = createContextWithGqlArgs(input);
+    jest
+      .spyOn(authService, "validateUser")
+      .mockResolvedValueOnce({ id: "asd", username: input.username });
 
     await expect(guard.canActivate(context)).resolves.toEqual(true);
+    expect(authService.validateUser).toBeCalledTimes(1);
+    expect(authService.validateUser).toBeCalledWith(...Object.values(input));
   });
 
-  it("Cannot login with wrong password", async () => {
-    const ggg = createMock<GraphQLExecutionContext>();
-    const args: any = [{}, { username: "admin", password: "Abcd12345" }, ggg, {}];
-    const context = createMock<ExecutionContext>({
-      getArgs: () => args,
-      getType: () => "graphql",
-    });
-
+  it("Cannot login with invalid credentials", async () => {
+    const context = createContextWithGqlArgs({});
+    jest.spyOn(authService, "validateUser").mockResolvedValueOnce(null);
     await expect(guard.canActivate(context)).rejects.toThrowError(AuthenticationError);
   });
 });
