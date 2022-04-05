@@ -8,15 +8,12 @@ import { SessionService } from "../session/session.service";
 
 @Injectable()
 export class TokenAuthGuard implements CanActivate {
-  constructor(
-    private jwtService: JwtService,
-    private sessionService: SessionService,
-  ) {}
+  constructor(private jwtService: JwtService, private sessionService: SessionService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const gqlContext = GqlExecutionContext.create(context);
     const request = gqlContext.getContext().req;
-    const accessToken = request.accesstoken || null;
+    const accessToken = request.headers.accesstoken || null;
 
     if (!accessToken) {
       throw new AuthenticationError("Access token was not provided.");
@@ -48,9 +45,7 @@ export class TokenAuthGuard implements CanActivate {
     }
 
     if (!Object.keys(payload).includes("sessionId")) {
-      throw new AuthenticationError(
-        "Access token does not contain a session ID.",
-      );
+      throw new AuthenticationError("Access token does not contain a session ID.");
     }
 
     return payload;

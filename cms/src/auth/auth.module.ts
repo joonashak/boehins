@@ -6,6 +6,7 @@ import { UserService } from "../user/user.service";
 import { AuthResolver } from "./auth.resolver";
 import { AuthService } from "./auth.service";
 import { SessionModule } from "./session/session.module";
+import { SessionService } from "./session/session.service";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SessionModule } from "./session/session.module";
       signOptions: { expiresIn: JWT_LIFETIME },
     }),
   ],
-  providers: [UserService, AuthService, AuthResolver],
+  providers: [UserService, AuthService, AuthResolver, SessionService],
+  exports: [SessionService],
 })
 export class AuthModule {}

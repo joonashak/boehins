@@ -4,12 +4,10 @@ import { getModelToken } from "@nestjs/mongoose";
 import { Test } from "@nestjs/testing";
 import { createMock } from "@golevelup/ts-jest";
 import { JWT_LIFETIME, JWT_SECRET } from "../../config";
-import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service";
 import { SessionService } from "../session/session.service";
 import { LoginGuard } from "./login.guard";
 import { GraphQLExecutionContext } from "@nestjs/graphql";
-import { hash } from "bcrypt";
 import { AuthenticationError } from "apollo-server-express";
 
 const createContextWithGqlArgs = (gqlArgs: any): ExecutionContext => {
