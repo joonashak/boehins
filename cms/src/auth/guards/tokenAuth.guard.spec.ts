@@ -3,7 +3,7 @@ import { JwtModule, JwtService } from "@nestjs/jwt";
 import { getModelToken } from "@nestjs/mongoose";
 import { Test } from "@nestjs/testing";
 import { createMock } from "@golevelup/ts-jest";
-import { JWT_LIFETIME, JWT_SECRET } from "../../config";
+import ms from "ms";
 import { SessionService } from "../session/session.service";
 import { TokenAuthGuard } from "./tokenAuth.guard";
 
@@ -18,14 +18,15 @@ const createContextWithHeaders = (headers: any): ExecutionContext => {
 
 describe("TokenAuthGuard", () => {
   let sessionService: SessionService;
+  let jwtService: JwtService;
   let guard: TokenAuthGuard;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       imports: [
         JwtModule.register({
-          secret: JWT_SECRET,
-          signOptions: { expiresIn: JWT_LIFETIME },
+          secret: "asd",
+          signOptions: { expiresIn: "30d" },
         }),
       ],
       providers: [
@@ -44,7 +45,7 @@ describe("TokenAuthGuard", () => {
       ],
     }).compile();
 
-    const jwtService = module.get<JwtService>(JwtService);
+    jwtService = module.get<JwtService>(JwtService);
     sessionService = module.get<SessionService>(SessionService);
     guard = new TokenAuthGuard(jwtService, sessionService);
   });
@@ -54,14 +55,16 @@ describe("TokenAuthGuard", () => {
   });
 
   it("Access granted with valid token and session", async () => {
-    const context = createContextWithHeaders({ accesstoken: "asd" });
+    const accessToken = jwtService.sign({ sessionId: "jkl" });
+    const context = createContextWithHeaders({ accesstoken: accessToken });
     jest.spyOn(sessionService, "findOneById").mockResolvedValueOnce({
-      id: "asd",
-      expiresAt: new Date(),
+      id: "jkl",
+      expiresAt: new Date(Date.now() + ms("30d")),
       user: { username: "asd", id: "asd" },
     });
 
     await expect(guard.canActivate(context)).resolves.toEqual(true);
+    expect(sessionService.findOneById).toBeCalledWith("jkl");
     expect(sessionService.findOneById).toBeCalledTimes(1);
   });
 });
